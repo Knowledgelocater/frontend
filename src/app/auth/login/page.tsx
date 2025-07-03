@@ -33,38 +33,45 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4">
-      <div className="w-full max-w-sm bg-white p-6 shadow-md rounded-lg">
-        <h1 className="text-3xl font-bold mb-6 text-center">Login</h1>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-white to-blue-50 px-4">
+      <div className="w-full max-w-sm bg-white p-8 shadow-xl rounded-lg border border-gray-100">
+        <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Login</h1>
+
         <form onSubmit={handleLogin}>
           <input
             type="email"
             placeholder="Email"
-            className="w-full mb-4 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full mb-4 px-4 py-2 border border-gray-300 rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
+
           <input
             type="password"
             placeholder="Password"
-            className="w-full mb-4 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full mb-4 px-4 py-2 border border-gray-300 rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          {error && <p className="text-red-600 text-sm mb-3">{error}</p>}
+
+          {error && (
+            <p className="text-red-600 text-sm mb-4 text-center">{error}</p>
+          )}
+
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 disabled:opacity-50"
+            className="w-full bg-blue-600 hover:bg-blue-700 transition text-white font-medium py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Logging in...' : 'Log In'}
           </button>
         </form>
-        <p className="text-center text-sm text-gray-600 mt-4">
+
+        <p className="text-center text-sm text-gray-600 mt-6">
           Don’t have an account?{' '}
-          <a href="/auth/register" className="text-blue-600 hover:underline">
+          <a href="/auth/register" className="text-blue-600 hover:underline font-medium">
             Register
           </a>
         </p>

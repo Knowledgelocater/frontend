@@ -36,38 +36,45 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="w-full max-w-md bg-white shadow-md rounded-lg p-6">
-        <h1 className="text-2xl font-semibold mb-6 text-center">Create Account</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-blue-50 px-4">
+      <div className="w-full max-w-md bg-white shadow-xl rounded-lg p-8 border border-gray-100">
+        <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Create Account</h1>
+
         <form onSubmit={handleRegister}>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full mb-4 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full mb-4 px-4 py-2 border border-gray-300 rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             placeholder="Email"
             required
           />
+
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full mb-4 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full mb-4 px-4 py-2 border border-gray-300 rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             placeholder="Password"
             required
           />
-          {error && <p className="text-red-600 text-sm mb-3">{error}</p>}
+
+          {error && (
+            <p className="text-red-600 text-sm mb-4 text-center">{error}</p>
+          )}
+
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
+            className="w-full bg-blue-600 hover:bg-blue-700 transition text-white font-medium py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Creating Account...' : 'Register'}
           </button>
         </form>
-        <p className="text-center text-sm text-gray-600 mt-4">
+
+        <p className="text-center text-sm text-gray-600 mt-6">
           Already have an account?{' '}
-          <a href="/auth/login" className="text-blue-600 hover:underline">
+          <a href="/auth/login" className="text-blue-600 hover:underline font-medium">
             Login
           </a>
         </p>
