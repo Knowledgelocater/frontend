@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const instance = axios.create({
-  baseURL: 'http://localhost:5000/api', // your backend root
+  baseURL: 'https://asskibou-production.up.railway.app/api', // your backend root
   headers: {
     'Content-Type': 'application/json',
   },
