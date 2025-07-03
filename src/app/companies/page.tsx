@@ -1,100 +1,163 @@
-// ✅ File: src/app/companies/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
 import axios from '@/utils/axios';
-import Navbar from '@/components/navbar';
 import { useRouter } from 'next/navigation';
 
 interface Company {
-  id: number;
+  id?: number;
   name: string;
   industry: string;
   description: string;
   logo_url?: string;
 }
 
-export default function CompaniesPage() {
+export default function CompanyPage() {
   const router = useRouter();
-  const [companies, setCompanies] = useState<Company[]>([]);
-  const [search, setSearch] = useState('');
+  const [company, setCompany] = useState<Company | null>(null);
+  const [form, setForm] = useState<Company>({
+    name: '',
+    industry: '',
+    description: '',
+    logo_url: '',
+  });
+
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
 
-  const fetchCompanies = async () => {
+  const fetchCompany = async () => {
     try {
-      const res = await axios.get('/companies/search', {
+      const res = await axios.get('/companies/me', {
         headers: { Authorization: `Bearer ${token}` },
-        params: { q: search },
       });
-      setCompanies(res.data);
-    } catch {
-      alert('Failed to load companies');
+      setCompany(res.data);
+      setForm(res.data);
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        setCompany(null); // No company exists yet
+      } else {
+        setError('Failed to fetch company');
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (!token) {
-      router.push('/auth/login');
-      return;
-    }
-    fetchCompanies();
-  }, [search]);
-
-  const handleViewDetails = (companyId: number) => {
-    router.push(`/companies/${companyId}`);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleSave = async () => {
+    if (!token) return;
+    setSaving(true);
+    try {
+      await axios.put('/companies', form, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      alert('✅ Company saved');
+      fetchCompany();
+    } catch (err: any) {
+      setError(err?.response?.data?.error || 'Failed to save company');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!company?.id) return;
+    if (!confirm('Are you sure you want to delete your company?')) return;
+
+    try {
+      await axios.delete(`/companies/${company.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      alert('❌ Company deleted');
+      setCompany(null);
+      setForm({ name: '', industry: '', description: '', logo_url: '' });
+    } catch {
+      alert('Failed to delete company');
+    }
+  };
+
+  useEffect(() => {
+    if (!token) router.push('/auth/login');
+    else fetchCompany();
+  }, []);
+
   return (
-    <>
-      {/* <Navbar /> */}
+    <div className="min-h-screen bg-gray-50 flex justify-center items-start pt-10 px-4">
+      <div className="bg-white p-6 rounded-lg shadow max-w-xl w-full space-y-4">
+        <h1 className="text-2xl font-bold text-blue-700 text-center">
+          {company ? 'Edit Company' : 'Add Company'}
+        </h1>
 
-      <div className="max-w-5xl mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-6 text-blue-700">🏢 All Companies</h1>
-
-        <input
-          type="text"
-          placeholder="Search companies by name or industry..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full mb-6 p-2 border border-gray-300 rounded shadow-sm"
-        />
-
+        {error && <p className="text-red-600 text-sm">{error}</p>}
         {loading ? (
-          <p>Loading...</p>
-        ) : companies.length === 0 ? (
-          <p className="text-gray-600">No companies found.</p>
+          <p className="text-center">Loading...</p>
         ) : (
-          <div className="grid gap-4">
-            {companies.map((company) => (
-              <div key={company.id} className="bg-white p-4 rounded shadow flex gap-4 items-start justify-between">
-                <div className="flex gap-4">
-                  {company.logo_url && (
-                    <img
-                      src={company.logo_url}
-                      alt={company.name}
-                      className="w-16 h-16 object-contain rounded border"
-                    />
-                  )}
-                  <div>
-                    <h2 className="text-xl font-semibold text-blue-700">{company.name}</h2>
-                    <p className="text-sm text-gray-500">{company.industry}</p>
-                    <p className="text-sm text-gray-600 mt-1">{company.description}</p>
-                  </div>
-                </div>
+          <>
+            <input
+              name="name"
+              placeholder="Company Name"
+              value={form.name}
+              onChange={handleChange}
+              required
+              className="w-full border text-gray-700 p-2 rounded"
+            />
+            <input
+              name="industry"
+              placeholder="Industry"
+              value={form.industry}
+              onChange={handleChange}
+              required
+              className="w-full border text-gray-700 p-2 rounded"
+            />
+            <input
+              name="logo_url"
+              placeholder="Logo URL (optional)"
+              value={form.logo_url || ''}
+              onChange={handleChange}
+              className="w-full border text-gray-700 p-2 rounded"
+            />
+            {form.logo_url && (
+              <img
+                src={form.logo_url}
+                alt="Logo"
+                className="h-20 object-contain text-gray-700 mx-auto border p-2 rounded bg-white"
+              />
+            )}
+            <textarea
+              name="description"
+              placeholder="Description"
+              value={form.description}
+              onChange={handleChange}
+              rows={4}
+              className="w-full border text-gray-700 p-2 rounded"
+            />
+
+            <div className="flex justify-between items-center mt-4">
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+              >
+                {saving ? 'Saving...' : company ? 'Update' : 'Add'}
+              </button>
+
+              {company && (
                 <button
-                  onClick={() => handleViewDetails(company.id)}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  onClick={handleDelete}
+                  className="text-red-600 border border-red-500 px-4 py-2 rounded hover:bg-red-50"
                 >
-                  View Details
+                  Delete
                 </button>
-              </div>
-            ))}
-          </div>
+              )}
+            </div>
+          </>
         )}
       </div>
-    </>
+    </div>
   );
 }
