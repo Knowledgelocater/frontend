@@ -53,10 +53,15 @@ export default function CompanyPage() {
     if (!token) return;
     setSaving(true);
     try {
-      await axios.put('/companies', form, {
+      // POST if company doesn't exist, PUT if it does
+      const method = company ? axios.put : axios.post;
+      const url = company ? '/companies' : '/companies';
+
+      await method(url, form, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      alert('✅ Company saved');
+
+      alert(`✅ Company ${company ? 'updated' : 'created'} successfully`);
       fetchCompany();
     } catch (err: any) {
       setError(err?.response?.data?.error || 'Failed to save company');
